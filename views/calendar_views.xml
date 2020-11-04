@@ -1,0 +1,208 @@
+<?xml version="1.0"?>
+<odoo>
+
+    <record id="is_view_calendar_event_form" model="ir.ui.view">
+        <field name="name">is_view_calendar_event_form</field>
+        <field name="model">calendar.event</field>
+        <field name="inherit_id" ref="calendar.view_calendar_event_form"/>
+        <field name="arch" type="xml">
+            <field name="allday" position="after">
+                <field name="is_employe_id"/>
+                <field name="is_partner_id"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="is_view_calendar_event_tree" model="ir.ui.view">
+        <field name="name">is_view_calendar_event_tree</field>
+        <field name="model">calendar.event</field>
+        <field name="inherit_id" ref="calendar.view_calendar_event_tree"/>
+        <field name="arch" type="xml">
+            <field name="partner_ids" position="replace">
+                <field name="is_employe_id"/>
+                <field name="is_partner_id"/>
+            </field>
+            <field name="duration" position="replace">
+                <field name="duration" widget="float_time" readonly="1" sum="Total"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="is_view_calendar_event_search" model="ir.ui.view">
+        <field name="name">is_view_calendar_event_search</field>
+        <field name="model">calendar.event</field>
+        <field name="inherit_id" ref="calendar.view_calendar_event_search"/>
+        <field name="arch" type="xml">
+            <field name="name" position="after">
+                <field name="is_employe_id"/>
+                <field name="is_partner_id"/>
+            </field>
+            <filter name="responsible" position="before">
+                <filter string="Employé" name="employe" domain="[]" context="{'group_by': 'is_employe_id'}"/>
+                <filter string="Client"  name="client"  domain="[]" context="{'group_by': 'is_partner_id'}"/>
+            </filter>
+        </field>
+    </record>
+
+    <record id="is_planification_pivot" model="ir.ui.view">
+        <field name="name">is_planification_pivot</field>
+        <field name="model">calendar.event</field>
+        <field name="arch" type="xml">
+            <pivot>
+                <field name="start"    type="row" interval="month"/>
+                <field name="user_id"  type="col"/>
+                <field name="duration" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="is_planification_graph" model="ir.ui.view">
+        <field name="name">is_planification_graph</field>
+        <field name="model">calendar.event</field>
+        <field name="arch" type="xml">
+            <graph>
+                <field name="start"    type="row" interval="month"/>
+                <field name="user_id"  type="col"/>
+                <field name="duration" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+
+    <record  id="is_planification_action" model="ir.actions.act_window">
+        <field name="name">Planification</field>
+        <field name="res_model">calendar.event</field>
+        <field name="limit">100</field>
+        <field name="view_mode">calendar,tree,form,pivot,graph</field>
+    </record>
+
+    <menuitem
+        id="is_planification_main_menu"
+        name="Planification"
+        sequence="0"
+    />
+    <menuitem
+        id="is_planification_menu"
+        name="Planification"
+        parent="is_planification_main_menu"
+        sequence="10"
+        action="is_planification_action"
+    />
+
+
+
+    <!--
+
+
+
+    <record id="view_calendar_event_calendar" model="ir.ui.view">
+        <field name="name">calendar.event.calendar</field>
+        <field name="model">calendar.event</field>
+        <field name="priority" eval="2"/>
+        <field name="arch" type="xml">
+            <calendar js_class="attendee_calendar" string="Meetings" date_start="start" date_stop="stop" date_delay="duration" all_day="allday"
+                event_open_popup="true"
+                event_limit="5"
+                color="user_id">
+                <field name="attendee_status"/>
+                <field name="user_id" string="Responsible" filters="1" widget="many2one_avatar_user"/>
+                <field name="partner_ids" widget="many2many_tags_avatar" write_model="calendar.contacts" write_field="partner_id" avatar_field="image_128"/>
+                <field name="is_highlighted" invisible="1"/>
+                <field name="description"/>
+                <field name="privacy"/>
+                <field name="recurrency" invisible="1"/>
+                <field name="recurrence_update" invisible="1"/>
+            </calendar>
+        </field>
+    </record>
+
+    <record id="view_calendar_event_search" model="ir.ui.view">
+        <field name="name">calendar.event.search</field>
+        <field name="model">calendar.event</field>
+        <field name="arch" type="xml">
+            <search string="Search Meetings">
+                <field name="name" string="Meeting" filter_domain="[('name', 'ilike', self)]"/>
+                <field name="partner_ids"/>
+                <field name="categ_ids"/>
+                <field name="user_id"/>
+                <field name="show_as"/>
+                <filter string="My Meetings" help="My Meetings" name="mymeetings" context='{"mymeetings": 1}'/>
+                <separator/>
+                <filter string="Date" name="filter_start_date" date="start_date"/>
+                <separator/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Responsible" name="responsible" domain="[]" context="{'group_by': 'user_id'}"/>
+                    <filter string="Availability" name="availability" domain="[]" context="{'group_by': 'show_as'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_calendar_event" model="ir.actions.act_window">
+        <field name="name">Meetings</field>
+        <field name="res_model">calendar.event</field>
+        <field name="view_mode">calendar,tree,form</field>
+        <field name="view_id" ref="view_calendar_event_calendar"/>
+        <field name="search_view_id" ref="view_calendar_event_search"/>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Schedule a new meeting
+          </p><p>
+            The calendar is shared between employees and fully integrated with
+            other applications such as the employee leaves or the business
+            opportunities.
+          </p>
+        </field>
+    </record>
+
+    <record id="action_view_calendar_event_calendar" model="ir.actions.act_window.view">
+        <field name="act_window_id" ref="action_calendar_event"/>
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">calendar</field>
+        <field name="view_id" ref="view_calendar_event_calendar"/>
+    </record>
+
+    <record id="action_view_calendar_event_tree" model="ir.actions.act_window.view">
+        <field name="act_window_id" ref="action_calendar_event"/>
+        <field name="sequence" eval="2"/>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="view_calendar_event_tree"/>
+    </record>
+
+    <record id="action_view_calendar_event_form" model="ir.actions.act_window.view">
+        <field name="act_window_id" ref="action_calendar_event"/>
+        <field name="sequence" eval="3"/>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_calendar_event_form"/>
+    </record>
+
+    <menuitem
+        id="mail_menu_calendar"
+        name="Calendar"
+        sequence="2"
+        action="action_calendar_event"
+        web_icon="calendar,static/description/icon.png"
+        groups="base.group_user"/>
+
+    <menuitem
+        id="menu_calendar_configuration"
+        name="Calendar"
+        parent="base.menu_custom"
+        sequence="30"
+        groups="base.group_no_one"/>
+
+    <menuitem
+        id="menu_calendar_event_type"
+        parent="menu_calendar_configuration"
+        action="action_calendar_event_type"
+        groups="base.group_no_one"/>
+
+    <menuitem
+        id="menu_calendar_alarm"
+        parent="menu_calendar_configuration"
+        action="action_calendar_alarm"
+        groups="base.group_no_one"/>
+
+-->
+</odoo>
